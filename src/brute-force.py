@@ -51,7 +51,8 @@ def main(args) -> None:
         logging.error("Brute force failed (no dimension pairs could be found).")
         exit(1)
 
-    logging.info("Interactive mode initiated. For each input image, you will be asked to enter 'y' when a legible representation appears, and 'n' otherwise.")
+    logging.info("Interactive mode initiated. For each input image, you will be asked to "
+                 "enter 'y' when a legible representation appears, and 'n' otherwise.")
     for filename in os.listdir(args.input_images):
         with open(f"{args.input_images}/{filename}", "rb") as file:
             encrypted_file = file.read()
@@ -78,15 +79,27 @@ def main(args) -> None:
     logging.info("Brute force completed.")
 
 
+# disclaimer:
+# it should be noted that due to the padding applied on some images during encryption,
+# the brute forced dimensions will not always yield (x * y * 3B/pixel) the actual size
+# of the file containing the encrypted header-less image;
+# observation:
+# in order to find the repeating sequence of pixels in the encrypted image, in the spots
+# where identical pixels are found, take the least common multiple of the number of bytes
+# which represent a single pixel and the block size of the cipher, and divide by the former
+# e.g. lcm(8, 3) = 24; 24B / 3 = 8 pixels (the period)
 if __name__ == '__main__':
     # force Pillow to load smaller than expected images in regard to the size specified in their headers
     ImageFile.LOAD_TRUNCATED_IMAGES = True
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input-images", required=True, type=str, dest="input_images", metavar="INPUT-IMAGES", help="directory containing header-less raw PPM images, encrypted using the ECB mode")
-    parser.add_argument("-hh", "--hashed-headers", required=True, type=str, dest="hashed_headers", metavar="HASHED-HEADERS",help="file containing the hashes of the headers associated with the PPM images, each one on a separate line")
-    parser.add_argument("-o", "--output-images", required=True, type=str, dest="output_images", metavar="OUTPUT-IMAGES", help="directory in which to store the brute-forced PPM images")
+    parser.add_argument("-i", "--input-images", required=True, type=str, dest="input_images", metavar="INPUT-IMAGES",
+                        help="directory containing header-less raw PPM images, encrypted using the ECB mode")
+    parser.add_argument("-hh", "--hashed-headers", required=True, type=str, dest="hashed_headers", metavar="HASHED-HEADERS",
+                        help="file containing the hashes of the headers associated with the PPM images, each one on a separate line")
+    parser.add_argument("-o", "--output-images", required=True, type=str, dest="output_images", metavar="OUTPUT-IMAGES",
+                        help="directory in which to store the brute-forced PPM images")
 
     arguments = parser.parse_args()
     main(arguments)
