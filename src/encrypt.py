@@ -69,6 +69,8 @@ def main(args) -> None:
     logging.info("Finished batch job.")
 
 
+# the problem with this security strategy is the receiver has no way of retrieving the header data, other than
+# brute-force, even when the hashes are transmitted in order, because the sha256 hash function is irreversible
 if __name__ == '__main__':
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
